@@ -5,6 +5,8 @@ CONFIG -= qt
 LIBS += -lpcap
 
 SOURCES += \
+        ip.cpp \
+        mac.cpp \
         main.cpp
 
 HEADERS += \
