@@ -101,11 +101,14 @@ int main(int argc, char* argv[])
             memcpy(req_packet.arp_.tmac_, (*rep).arp_.smac_ , 6);
             req_packet.arp_.op_ = htons(ArpHdr::Reply);
             req_packet.arp_.sip_ = htonl(Ip(target_IP));
+            int reply = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&req_packet), sizeof(EthArpPacket));
+            if (reply != 0) {
+                fprintf(stderr, "pcap_sendpacket return %d error=%s\n", reply, pcap_geterr(handle));
+            }break;
         }
-        int reply = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&req_packet), sizeof(EthArpPacket));
-        if (reply != 0) {
-            fprintf(stderr, "pcap_sendpacket return %d error=%s\n", reply, pcap_geterr(handle));
+        else{
+            printf("Reply Error!!!\n");
+            return 0;
         }
-    }
     pcap_close(handle);
 }
