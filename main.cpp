@@ -97,18 +97,20 @@ int main(int argc, char* argv[])
         if(ntohs((*rep).eth_.type_) != EthHdr::Arp) continue;
         if((*rep).arp_.tip_ == req_packet.arp_.sip_&&(*rep).arp_.sip_ == req_packet.arp_.tip_)
         {
-            memcpy(req_packet.eth_.dmac_, (*rep).arp_.smac_ , 6);
-            memcpy(req_packet.arp_.tmac_, (*rep).arp_.smac_ , 6);
+            req_packet.eth_.dmac_ = (*rep).arp_.smac_;
+            req_packet.arp_.tmac_ = (*rep).arp_.smac_;
             req_packet.arp_.op_ = htons(ArpHdr::Reply);
             req_packet.arp_.sip_ = htonl(Ip(target_IP));
             int reply = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&req_packet), sizeof(EthArpPacket));
             if (reply != 0) {
                 fprintf(stderr, "pcap_sendpacket return %d error=%s\n", reply, pcap_geterr(handle));
-            }break;
+            }
+            break;
         }
         else{
             printf("Reply Error!!!\n");
             return 0;
         }
-    pcap_close(handle);
+        pcap_close(handle);
+    }
 }
