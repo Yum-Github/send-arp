@@ -27,9 +27,9 @@ int main(int argc, char* argv[])
         return -1;
     }
     char* dev = argv[1];
-    char* sender_IP = argv[2];
-    char* target_IP = argv[3];
-    uint8_t me_mac[6];
+    Ip sender_IP = std::string(argv[2]);
+    Ip target_IP = std::string(argv[3]);
+    Mac me_mac;
 
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t* handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
@@ -52,22 +52,11 @@ int main(int argc, char* argv[])
 
     EthArpPacket req_packet;
     Get_MAC(dev, me_mac);
-    for(int i=0; i<6; i++)
-    {
-        req_packet.eth_.dmac_[i] = 0xff;
-    }
-    for(int i=0; i<6; i++)
-    {
-        req_packet.eth_.smac_[i] = me_mac[i];
-    }
-    for(int i=0; i<6; i++)
-    {
-        req_packet.arp_.tmac_[i] = 0x00;
-    }
-    for(int i=0; i<6; i++)
-    {
-        req_packet.arp_.smac_[i] = me_mac[i];
-    }
+    memset(req_packet.eth_.dmac_,0xff,6);
+    req_packet.eth_.smac_= me_mac;
+    memset(req_packet.arp_.tmac_,0x00,6);
+    req_packet.arp_.smac_= me_mac;
+
     req_packet.eth_.type_ = htons(EthHdr::Arp);
     req_packet.arp_.hrd_ = htons(ArpHdr::ETHER);
     req_packet.arp_.pro_ = htons(EthHdr::Ip4);
@@ -109,7 +98,7 @@ int main(int argc, char* argv[])
         }
         else{
             printf("Reply Error!!!\n");
-            return 0;
+            continue;
         }
         pcap_close(handle);
     }
